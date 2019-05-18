@@ -23,5 +23,6 @@ https://aka.ms/dotnet-download
 Finally, from the root of the directory: 
 
 ```
+$ export GOOGLE_APPLICATION_CREDENTIALS=NewAgent-a0dd6e8b24b6.json
 $ dotnet run
 ```
