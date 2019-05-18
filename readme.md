@@ -3,7 +3,7 @@
 ## API Access
 
 ```
-GET /api/sound/{lang}/{text}
+GET /api/sound/{lang}/{text}/{gender?}
 ```
 
 ```
@@ -11,6 +11,39 @@ POST /api/sound
 
 {
   "Language": "en-US",
+  "Content": "Hello World",
+  "Gender": "female" // "male" | "female" | "neutral"
+}
+```
+
+
+```
+GET /api/sound/trans/{inlang}/{outlang}/{text}/{gender?}
+```
+
+```
+POST /api/sound/trans
+
+{
+  "InputLang": "en-US",
+  "OutputLang": "fr-FR",
+  "Content": "Hello World",
+  "Gender": "female"
+}
+```
+
+
+
+```
+GET /api/trans/{inlang}/{outlang}/{text}
+```
+
+```
+POST /api/sound/trans
+
+{
+  "InputLang": "en-US",
+  "OutputLang": "fr-FR",
   "Content": "Hello World",
 }
 ```
