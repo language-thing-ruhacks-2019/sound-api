@@ -19,7 +19,7 @@ namespace speech_synth.Controllers
                 case "neutral":
                     return SsmlVoiceGender.Neutral;
                 default:
-                    return SsmlVoiceGender.Female;
+                    return SsmlVoiceGender.Unspecified;
             }
         }
     }

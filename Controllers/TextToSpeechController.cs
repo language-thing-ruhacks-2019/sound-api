@@ -27,9 +27,9 @@ namespace speech_synth.Controllers
         }
 
         private async Task<IActionResult> GetGoogleTtsResult(string lang,
-            string content,
-            SsmlVoiceGender gender,
-            AudioEncoding encoding)
+           string content,
+           string wavenet,
+           AudioEncoding encoding)
         {
             var input = new SynthesisInput
             {
@@ -39,27 +39,35 @@ namespace speech_synth.Controllers
             var voiceSelection = new VoiceSelectionParams
             {
                 LanguageCode = lang,
-                SsmlGender = gender
             };
+
+            if (wavenet?.ToGender() != SsmlVoiceGender.Unspecified)
+            {
+                voiceSelection.SsmlGender = wavenet?.ToGender() ?? "female".ToGender();
+            }
+            else
+            {
+                voiceSelection.Name = wavenet;
+            }
 
             var audioConfig = new AudioConfig
             {
                 AudioEncoding = encoding
             };
-            
+
             var response = await this.Client.SynthesizeSpeechAsync(input, voiceSelection, audioConfig);
 
             var fStream = new MemoryStream();
             response.AudioContent.WriteTo(fStream);
             fStream.Seek(0, SeekOrigin.Begin);
             return new FileStreamResult(fStream, "audio/mpeg");
-            
         }
+
 
         [HttpGet("{language}/{echo}/{gender?}")]
         public Task<IActionResult> Get(string language, string echo, string gender = "female")
         {
-            return GetGoogleTtsResult(language, echo, gender.ToGender(), AudioEncoding.Mp3);
+            return GetGoogleTtsResult(language, echo, gender, AudioEncoding.Mp3);
         }
 
         // POST api/values
@@ -67,7 +75,7 @@ namespace speech_synth.Controllers
         public Task<IActionResult> Post([FromBody] string body)
         {
             var (lang, content, gender) = JsonConvert.DeserializeObject<TextToSpeechParameters>(body);
-            return GetGoogleTtsResult(lang, content, gender?.ToGender() ?? "female".ToGender(), AudioEncoding.Mp3);
+            return GetGoogleTtsResult(lang, content, gender, AudioEncoding.Mp3);
         }
 
         #region template

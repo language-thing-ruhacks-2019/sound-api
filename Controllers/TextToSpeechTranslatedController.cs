@@ -29,10 +29,10 @@ namespace speech_synth.Controllers
             return "Hello World Translated";
         }
 
-        private async Task<IActionResult> GetGoogleTtsResult(string lang,
-          string content,
-          SsmlVoiceGender gender,
-          AudioEncoding encoding)
+         private async Task<IActionResult> GetGoogleTtsResult(string lang,
+            string content,
+            string wavenet,
+            AudioEncoding encoding)
         {
             var input = new SynthesisInput
             {
@@ -42,8 +42,16 @@ namespace speech_synth.Controllers
             var voiceSelection = new VoiceSelectionParams
             {
                 LanguageCode = lang,
-                SsmlGender = gender
             };
+
+            if (wavenet?.ToGender() != SsmlVoiceGender.Unspecified)
+            {
+                voiceSelection.SsmlGender = wavenet?.ToGender() ?? "female".ToGender();
+            }
+            else
+            {
+                voiceSelection.Name = wavenet;
+            }
 
             var audioConfig = new AudioConfig
             {
@@ -62,8 +70,11 @@ namespace speech_synth.Controllers
         [HttpGet("{inlang}/{olang}/{content}/{gender?}")]
         public async Task<IActionResult> Get(string inlang, string olang, string content, string gender = "female")
         {
-            var translatedContent = await this.TransClient.TranslateTextAsync(content, olang.Split('-')[0], inlang.Split('-')[0]);
-            return await GetGoogleTtsResult(olang, translatedContent.TranslatedText, gender.ToGender(), AudioEncoding.Mp3);
+            string lang = olang.Split('-')[0];
+            if (lang == "zh") lang = olang; // special case chinese
+            var translatedContent = await this.TransClient.TranslateTextAsync(content, lang, inlang.Split('-')[0]);
+            return await GetGoogleTtsResult(olang, translatedContent.TranslatedText, gender, AudioEncoding.Mp3);
+
         }
 
         // POST api/values
@@ -72,8 +83,12 @@ namespace speech_synth.Controllers
         {
             var param = JsonConvert.DeserializeObject<TextToSpeechTranslatedParameters>(body);
 
-            var translatedContent = await this.TransClient.TranslateTextAsync(param.Content, param.OutputLang.Split('-')[0], param.InputLang.Split('-')[0]);
-            return await GetGoogleTtsResult(param.OutputLang, translatedContent.TranslatedText, param.Gender?.ToGender() ?? "female".ToGender(), AudioEncoding.Mp3);
+            string lang = param.OutputLang.Split('-')[0];
+            if (lang == "zh") lang = param.OutputLang; // special case chinese
+
+            var translatedContent = await this.TransClient.TranslateTextAsync(param.Content, lang, param.InputLang.Split('-')[0]);
+            return await GetGoogleTtsResult(param.OutputLang, translatedContent.TranslatedText, param.Gender, AudioEncoding.Mp3);
+
         }
     }
 }

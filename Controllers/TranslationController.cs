@@ -31,7 +31,10 @@ namespace speech_synth.Controllers
         public async Task<ActionResult<string>> Get(string inlang, string olang, string content)
         {
 
-            var translatedContent = await this.TransClient.TranslateTextAsync(content, olang.Split('-')[0], inlang.Split('-')[0]);
+            string lang = olang.Split('-')[0];
+            if (lang == "zh") lang = olang; // special case chinese
+
+            var translatedContent = await this.TransClient.TranslateTextAsync(content, lang, inlang.Split('-')[0]);
             return JsonConvert.SerializeObject(translatedContent);
         }
 
@@ -41,7 +44,10 @@ namespace speech_synth.Controllers
         {
             var param = JsonConvert.DeserializeObject<TextToSpeechTranslatedParameters>(body);
 
-            var translatedContent = await this.TransClient.TranslateTextAsync(param.Content, param.OutputLang.Split('-')[0], param.InputLang.Split('-')[0]);
+            string lang = param.OutputLang.Split('-')[0];
+            if (lang == "zh") lang = param.OutputLang; // special case chinese
+
+            var translatedContent = await this.TransClient.TranslateTextAsync(param.Content, lang, param.InputLang.Split('-')[0]);
             return JsonConvert.SerializeObject(translatedContent);
 
         }
