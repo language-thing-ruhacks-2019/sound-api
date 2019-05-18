@@ -24,7 +24,7 @@
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "GOOGLE_APPLICATION_CREDENTIALS": "NewAgent-a0dd6e8b24b6.json"
+        "GOOGLE_APPLICATION_CREDENTIALS": "NewAgent-0c04c16f0ea3.json"
       }
     }
   }

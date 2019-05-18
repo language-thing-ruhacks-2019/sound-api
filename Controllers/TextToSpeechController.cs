@@ -62,15 +62,36 @@ namespace speech_synth.Controllers
         {
             return GetGoogleTtsResult(language, echo, SsmlVoiceGender.Female, AudioEncoding.Mp3);
         }
+        
+        [HttpGet("{language}/{echo}/{gender}")]
+        public IActionResult Get(string language, string echo, string gender)
+        {
+            return GetGoogleTtsResult(language, echo, ToGender(gender), AudioEncoding.Mp3);
+        }
 
         // POST api/values
         [HttpPost]
         public IActionResult Post([FromBody] string body)
         {
-            var (lang, content) = JsonConvert.DeserializeObject<TextToSpeechParameters>(body);
-            return GetGoogleTtsResult(lang, content, SsmlVoiceGender.Female, AudioEncoding.Mp3);
+            var (lang, content, gender) = JsonConvert.DeserializeObject<TextToSpeechParameters>(body);
+            
+            return GetGoogleTtsResult(lang, content, ToGender(gender), AudioEncoding.Mp3);
         }
-        
+
+        public static SsmlVoiceGender ToGender(string gender)
+        {
+            switch (gender.ToLowerInvariant())
+            {
+                case "male":
+                    return SsmlVoiceGender.Male;
+                case "female":
+                    return SsmlVoiceGender.Female;
+                case "neutral":
+                    return SsmlVoiceGender.Neutral;
+                default:
+                    return SsmlVoiceGender.Female;
+            }
+        }
         #region template
         /*
         // GET api/values/5
