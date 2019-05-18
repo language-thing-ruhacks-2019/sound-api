@@ -11,10 +11,10 @@ namespace speech_synth.Controllers
 {
     [Route("api/sound")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class TextToSpeechController : ControllerBase
     {
         private TextToSpeechClient Client { get; }
-        public ValuesController()
+        public TextToSpeechController()
         {
             this.Client =  TextToSpeechClient.Create();
             
@@ -26,7 +26,7 @@ namespace speech_synth.Controllers
             return "Hello World";
         }
 
-        private IActionResult GetGoogleTtsResult(string lang,
+        private async Task<IActionResult> GetGoogleTtsResult(string lang,
             string content,
             SsmlVoiceGender gender,
             AudioEncoding encoding)
@@ -47,7 +47,7 @@ namespace speech_synth.Controllers
                 AudioEncoding = encoding
             };
             
-            var response = this.Client.SynthesizeSpeech(input, voiceSelection, audioConfig);
+            var response = await this.Client.SynthesizeSpeechAsync(input, voiceSelection, audioConfig);
 
             var fStream = new MemoryStream();
             response.AudioContent.WriteTo(fStream);
@@ -56,42 +56,21 @@ namespace speech_synth.Controllers
             
         }
 
-        // GET api/values
-        [HttpGet("{language}/{echo}")]
-        public IActionResult Get(string language, string echo)
+        [HttpGet("{language}/{echo}/{gender?}")]
+        public Task<IActionResult> Get(string language, string echo, string gender = "female")
         {
-            return GetGoogleTtsResult(language, echo, SsmlVoiceGender.Female, AudioEncoding.Mp3);
-        }
-        
-        [HttpGet("{language}/{echo}/{gender}")]
-        public IActionResult Get(string language, string echo, string gender)
-        {
-            return GetGoogleTtsResult(language, echo, ToGender(gender), AudioEncoding.Mp3);
+            return GetGoogleTtsResult(language, echo, gender.ToGender(), AudioEncoding.Mp3);
         }
 
         // POST api/values
         [HttpPost]
-        public IActionResult Post([FromBody] string body)
+        public Task<IActionResult> Post([FromBody] string body)
         {
             var (lang, content, gender) = JsonConvert.DeserializeObject<TextToSpeechParameters>(body);
             
-            return GetGoogleTtsResult(lang, content, ToGender(gender), AudioEncoding.Mp3);
+            return GetGoogleTtsResult(lang, content, gender?.ToGender() ?? "female".ToGender(), AudioEncoding.Mp3);
         }
 
-        public static SsmlVoiceGender ToGender(string gender)
-        {
-            switch (gender.ToLowerInvariant())
-            {
-                case "male":
-                    return SsmlVoiceGender.Male;
-                case "female":
-                    return SsmlVoiceGender.Female;
-                case "neutral":
-                    return SsmlVoiceGender.Neutral;
-                default:
-                    return SsmlVoiceGender.Female;
-            }
-        }
         #region template
         /*
         // GET api/values/5
