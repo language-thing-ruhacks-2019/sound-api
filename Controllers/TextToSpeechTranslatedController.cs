@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace speech_synth.Controllers
 {
-    [Route("api/trans")]
+    [Route("api/sound/trans")]
     [ApiController]
     public class TextToSpeechTranslatedController : ControllerBase
     {
@@ -62,12 +62,10 @@ namespace speech_synth.Controllers
         [HttpGet("{inlang}/{olang}/{content}/{gender?}")]
         public async Task<IActionResult> Get(string inlang, string olang, string content, string gender = "female")
         {
-
             var translatedContent = await this.TransClient.TranslateTextAsync(content, olang.Split('-')[0], inlang.Split('-')[0]);
             return await GetGoogleTtsResult(olang, translatedContent.TranslatedText, gender.ToGender(), AudioEncoding.Mp3);
         }
 
-     
         // POST api/values
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] string body)

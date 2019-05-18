@@ -67,7 +67,6 @@ namespace speech_synth.Controllers
         public Task<IActionResult> Post([FromBody] string body)
         {
             var (lang, content, gender) = JsonConvert.DeserializeObject<TextToSpeechParameters>(body);
-            
             return GetGoogleTtsResult(lang, content, gender?.ToGender() ?? "female".ToGender(), AudioEncoding.Mp3);
         }
 
